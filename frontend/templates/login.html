@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Login{% endblock %}
+{% block content %}
+<section class="my-5 py-4 py-md-5">
+    <div class="container py-md-5">
+        <div class="row">
+            <div class="col-md-6 text-center"><img class="img-fluid w-100" src="{% static 'assets/img/illustrations/login.svg' %}"></div>
+            <div class="col-md-5 col-xl-4 text-center text-md-start">
+                <h2 class="display-6 fw-bold mb-5"><span class="pb-1 underline"><strong>Login</strong><br></span></h2>
+                <form method="post" data-bs-theme="light" action="{% url 'login' %}">
+                    {% csrf_token %}
+                    <div class="mb-3"><input class="shadow form-control" type="email" name="email" placeholder="Email"></div>
+                    <div class="mb-3"><input class="shadow form-control" type="password" name="password" placeholder="Password"></div>
+                    <div class="mb-5"><button class="btn btn-primary shadow" type="submit">Log in</button></div>
+                </form>
+                <p class="text-muted"><a href="/forgotten-password">Forgot your password?</a></p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

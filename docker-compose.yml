@@ -50,11 +50,11 @@ services:
         sleep 2;
       done;
       python manage.py migrate &&
-      python manage.py runserver 0.0.0.0:8000"
+      python manage.py runserver 0.0.0.0:8888"
     volumes:
       - .:/app
     ports:
-      - "8000:8000"
+      - "8888:8888"
     env_file:
       - .env
 
