@@ -9,4 +9,5 @@ urlpatterns = [
     path("logout/", logout_view, name="logout"),
     path("spotify-playlists/", spotify_playlists, name="spotify_playlists"),
     path("settings/", settings_view, name="settings"),
+    path("signup/", signup_view, name="signup"),
 ]

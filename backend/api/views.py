@@ -14,6 +14,8 @@ from backend.utils import spotify_helpers as sh
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.authentication import SessionAuthentication
 
+from django.shortcuts import redirect
+
 log = logging.getLogger(__name__)
 
 
@@ -88,7 +90,7 @@ class SpotifyCallbackView(APIView):
         try:
             token_data = sh.exchange_code(code)
             profile = sh.get_profile(token_data["access_token"])
-        except Exception as exc:  # pragma: no cover
+        except Exception as exc:
             log.exception("Spotify callback failed")
             return Response({"detail": str(exc)}, status=500)
 
@@ -102,14 +104,14 @@ class SpotifyCallbackView(APIView):
                 + timedelta(seconds=token_data["expires_in"]),
             ),
         )
-        return Response({"detail": "Spotify connected"})
+        return redirect("/spotify-playlists/")
 
 class PlaylistViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing user playlists.
 
     Endpoints:
-        /api/playlists/  – Provides CRUD operations for playlists.
+        /api/playlists/  - Provides CRUD operations for playlists.
 
     Key Behaviors:
         - Only authenticated users can access these endpoints.

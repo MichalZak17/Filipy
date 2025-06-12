@@ -3,30 +3,73 @@
 
 {% block title %}Spotify Playlists{% endblock %}
 {% block content %}
+
 <section class="my-2 py-4 py-md-5">
     <div class="container py-md-5">
-        <div class="d-flex justify-content-center gap-3 my-4">
-            <!-- data-prompt seeds drop straight into the modal -->
-            <button class="btn btn-primary  mood-btn"
-                    data-prompt="Bright upbeat songs to boost my mood"
-                    data-bs-toggle="modal" data-bs-target="#playlistPromptModal">
-                Happy Vibes
-            </button>
-            <button class="btn btn-secondary mood-btn"
-                    data-prompt="Calm lo-fi tracks for a quiet evening"
-                    data-bs-toggle="modal" data-bs-target="#playlistPromptModal">
-                Chill & Relax
-            </button>
-            <button class="btn btn-warning   mood-btn"
-                    data-prompt="High-energy beats for an intense workout"
-                    data-bs-toggle="modal" data-bs-target="#playlistPromptModal">
-                Energetic Beats
-            </button>
-        </div>
+      <button class="btn" id="connectSpotifyBtn"
+          style="background-color: #6ed46a; color: #fff;"
+          data-prompt="High-energy beats for an intense workout"
+          data-bs-toggle="modal">
+          Connect Spotify
+      </button>
+      <br><br><br>
+      <div class="d-flex justify-content-center gap-3 my-4">
+          <button class="btn btn-warning  mood-btn"
+                  data-prompt="Bright upbeat songs to boost my mood"
+                  data-bs-toggle="modal" data-bs-target="#playlistPromptModal">
+              Happy Vibes
+          </button>
+          <button class="btn btn-warning mood-btn"
+                  data-prompt="Calm lo-fi tracks for a quiet evening"
+                  data-bs-toggle="modal" data-bs-target="#playlistPromptModal">
+              Chill & Relax
+          </button>
+          <button class="btn btn-warning mood-btn"
+                  data-prompt="High-energy beats for an intense workout"
+                  data-bs-toggle="modal" data-bs-target="#playlistPromptModal">
+              Energetic Beats
+          </button>
+      </div>
     </div>
 </section>
 
-<!-- Prompt modal -->
+<section class="my-2 py-4 py-md-5">
+    <div class="container py-md-5">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Playlist</th>
+            <th scope="col">Description</th>
+            <th scope="col">Link</th>
+          </tr>
+        </thead>
+        <tbody class="table-group-divider">
+          {% for playlist in playlists %}
+          <tr>
+            <th scope="row">{{ forloop.counter }}</th>
+            <td>{{ playlist.name }}</td>
+            <td>{{ playlist.description }}</td>
+            <td>
+              {% if playlist.spotify_id %}
+              <a href="https://open.spotify.com/playlist/{{ playlist.spotify_id }}" target="_blank">
+                Open on Spotify
+              </a>
+              {% else %}
+              Not available yet
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <th scope="row" colspan="4" class="text-center">No playlists found</th>
+          </tr>
+          {% endfor %}          
+        </tbody>
+      </table>
+    </div>
+</section>
+
 <div class="modal fade" id="playlistPromptModal" tabindex="-1" aria-labelledby="playlistPromptLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -57,14 +100,23 @@
 
 {% block extra_scripts %}
 <script type="module">
-(async function bootstrapJWT(){
-  if (localStorage.getItem("filipy_jwt")) return;
-  const r = await fetch("/api/token/session/");
-  if (r.ok) {
-    const {access} = await r.json();
-    localStorage.setItem("filipy_jwt", access);
-  }
-})();
+  document.getElementById("connectSpotifyBtn").addEventListener("click", async ()=>{
+    if(!await API.ensureSpotify()) return;
+    const r = await fetch("/api/auth/spotify/login/", {
+      headers: {Authorization:`Bearer ${API.getJWT()}`}
+    });
+    window.location = (await r.json()).url;
+  });
+
+
+  (async function bootstrapJWT(){
+    if (localStorage.getItem("filipy_jwt")) return;
+    const r = await fetch("/api/token/session/");
+    if (r.ok) {
+      const {access} = await r.json();
+      localStorage.setItem("filipy_jwt", access);
+    }
+  })();
 
 const API = {
   getJWT:  () => localStorage.getItem("filipy_jwt") || "",
@@ -79,10 +131,10 @@ const API = {
       const r = await fetch("/api/auth/spotify/login/", {
         headers: {Authorization:`Bearer ${API.getJWT()}`}
       });
-      window.location = (await r.json()).url;   // redirect to Spotify
+      window.location = (await r.json()).url;
       return false;
     }
-    alert("Please log in first");               // 401 or no JWT
+    alert("Please log in first");
     return false;
   },
 
@@ -97,7 +149,7 @@ const API = {
       body:JSON.stringify({name,description,mood_prompt:prompt})
     });
     if(!r.ok) throw new Error(await r.text());
-    return r.json();           // returns {id, spotify_id: null}
+    return r.json();
   },
 
   async waitForSpotify(id, ms=60_000, step=3_000){
@@ -114,22 +166,18 @@ const API = {
   }
 };
 
-/* ---------- UI bindings ---------- */
-// 1) preset prompt when any mood-btn opens the modal
 document.querySelectorAll(".mood-btn").forEach(btn=>{
   btn.addEventListener("click",()=>{
     document.getElementById("playlistPromptInput").value = btn.dataset.prompt || "";
   });
 });
 
-// 2) example chips inside the modal
 document.querySelectorAll(".example-btn").forEach(btn=>{
   btn.addEventListener("click", ()=> {
     document.getElementById("playlistPromptInput").value = btn.dataset.prompt;
   });
 });
 
-// 3) main Submit handler
 document.getElementById("submitPlaylistPrompt")
         .addEventListener("click", async ()=>{
   const prompt = document.getElementById("playlistPromptInput").value.trim();
@@ -149,14 +197,21 @@ document.getElementById("submitPlaylistPrompt")
   }catch(e){ alert(e.message || "Something went wrong"); }
 });
 
-// 4) handle ?code=... when Spotify redirects back
 (function(){
   const qs = new URLSearchParams(location.search);
   if(!qs.has("code")) return;
   fetch(`/api/auth/spotify/callback/?${qs}`,{
     headers:{Authorization:`Bearer ${API.getJWT()}`}
   })
-  .then(()=>alert("Spotify connected — create away!"))
+  .then(r => {
+    if (r.status === 200) {
+      location.href = "/";
+      return;
+    }
+    return r.json().then(data => {
+      alert(data.detail || "Spotify connection failed");
+    });
+  })
   .catch(()=>alert("Spotify connection failed"))
   .finally(()=>history.replaceState({},"",location.pathname));
 })();
