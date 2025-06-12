@@ -7,4 +7,6 @@ urlpatterns = [
     path("login/", login_view, name="login"),
     path("forgotten-password/", forgotten_password_view, name="forgotten_password"),
     path("logout/", logout_view, name="logout"),
+    path("spotify-playlists/", spotify_playlists, name="spotify_playlists"),
+    path("settings/", settings_view, name="settings"),
 ]

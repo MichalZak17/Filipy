@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Spotify Playlists{% endblock %}
+{% block content %}
+<section class="my-2 py-4 py-md-5">
+    <div class="container py-md-5">
+        <div class="d-flex justify-content-center gap-3 my-4">
+            <!-- data-prompt seeds drop straight into the modal -->
+            <button class="btn btn-primary  mood-btn"
+                    data-prompt="Bright upbeat songs to boost my mood"
+                    data-bs-toggle="modal" data-bs-target="#playlistPromptModal">
+                Happy Vibes
+            </button>
+            <button class="btn btn-secondary mood-btn"
+                    data-prompt="Calm lo-fi tracks for a quiet evening"
+                    data-bs-toggle="modal" data-bs-target="#playlistPromptModal">
+                Chill & Relax
+            </button>
+            <button class="btn btn-warning   mood-btn"
+                    data-prompt="High-energy beats for an intense workout"
+                    data-bs-toggle="modal" data-bs-target="#playlistPromptModal">
+                Energetic Beats
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- Prompt modal -->
+<div class="modal fade" id="playlistPromptModal" tabindex="-1" aria-labelledby="playlistPromptLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="playlistPromptLabel">What do you want in your playlist?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <textarea id="playlistPromptInput" class="form-control mb-3" rows="3"
+                  placeholder="e.g. mellow acoustic for a rainy afternoon"></textarea>
+        <div class="d-flex justify-content-between">
+          <button type="button" class="btn btn-sm btn-outline-secondary example-btn"
+                  data-prompt="Upbeat pop hits for a morning workout">Workout</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary example-btn"
+                  data-prompt="Chill lo-fi beats to relax after work">Relax</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary example-btn"
+                  data-prompt="Deep-house tracks for an evening party">Party</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="submitPlaylistPrompt">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script type="module">
+(async function bootstrapJWT(){
+  if (localStorage.getItem("filipy_jwt")) return;
+  const r = await fetch("/api/token/session/");
+  if (r.ok) {
+    const {access} = await r.json();
+    localStorage.setItem("filipy_jwt", access);
+  }
+})();
+
+const API = {
+  getJWT:  () => localStorage.getItem("filipy_jwt") || "",
+  setJWT:  t  => localStorage.setItem("filipy_jwt", t),
+
+  async ensureSpotify () {
+    const ping = await fetch("/api/playlists/", {
+      headers: {Authorization:`Bearer ${API.getJWT()}`}
+    });
+    if (ping.status === 200) return true;
+    if (ping.status === 403) {
+      const r = await fetch("/api/auth/spotify/login/", {
+        headers: {Authorization:`Bearer ${API.getJWT()}`}
+      });
+      window.location = (await r.json()).url;   // redirect to Spotify
+      return false;
+    }
+    alert("Please log in first");               // 401 or no JWT
+    return false;
+  },
+
+  async createPlaylist({name, description, prompt}) {
+    await API.ensureSpotify();
+    const r = await fetch("/api/playlists/", {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        Authorization:`Bearer ${API.getJWT()}`
+      },
+      body:JSON.stringify({name,description,mood_prompt:prompt})
+    });
+    if(!r.ok) throw new Error(await r.text());
+    return r.json();           // returns {id, spotify_id: null}
+  },
+
+  async waitForSpotify(id, ms=60_000, step=3_000){
+    const t0 = Date.now();
+    while(Date.now()-t0 < ms){
+      const r = await fetch(`/api/playlists/${id}/`,{
+        headers:{Authorization:`Bearer ${API.getJWT()}`}
+      });
+      const p = await r.json();
+      if(p.spotify_id) return p.spotify_id;
+      await new Promise(res=>setTimeout(res,step));
+    }
+    throw new Error("Timed-out waiting for Spotify");
+  }
+};
+
+/* ---------- UI bindings ---------- */
+// 1) preset prompt when any mood-btn opens the modal
+document.querySelectorAll(".mood-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.getElementById("playlistPromptInput").value = btn.dataset.prompt || "";
+  });
+});
+
+// 2) example chips inside the modal
+document.querySelectorAll(".example-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=> {
+    document.getElementById("playlistPromptInput").value = btn.dataset.prompt;
+  });
+});
+
+// 3) main Submit handler
+document.getElementById("submitPlaylistPrompt")
+        .addEventListener("click", async ()=>{
+  const prompt = document.getElementById("playlistPromptInput").value.trim();
+  if(!prompt) return alert("Please enter a prompt.");
+
+  try{
+    const pl = await API.createPlaylist({
+      name: prompt.slice(0,40) || "Filipy Playlist",
+      description: prompt,
+      prompt
+    });
+    const sid = await API.waitForSpotify(pl.id);
+    window.open(`https://open.spotify.com/playlist/${sid}`,"_blank");
+    bootstrap.Modal.getInstance(
+      document.getElementById("playlistPromptModal")
+    ).hide();
+  }catch(e){ alert(e.message || "Something went wrong"); }
+});
+
+// 4) handle ?code=... when Spotify redirects back
+(function(){
+  const qs = new URLSearchParams(location.search);
+  if(!qs.has("code")) return;
+  fetch(`/api/auth/spotify/callback/?${qs}`,{
+    headers:{Authorization:`Bearer ${API.getJWT()}`}
+  })
+  .then(()=>alert("Spotify connected — create away!"))
+  .catch(()=>alert("Spotify connection failed"))
+  .finally(()=>history.replaceState({},"",location.pathname));
+})();
+</script>
+{% endblock %}

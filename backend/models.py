@@ -2,27 +2,18 @@ from django.db import models
 from django.conf import settings
 
 
-class Spotify(models.Model):
-    """
-    Model representing a Spotify user authentication profile.
+class SpotifyAccount(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    spotify_id = models.CharField(max_length=120)
+    access_token = models.TextField()
+    refresh_token = models.TextField()
+    token_expires_at = models.DateTimeField()
 
-    Fields:
-        user (OneToOneField): Link to Django user.
-        access_token (CharField): Spotify API access token.
-        refresh_token (CharField): Spotify API refresh token.
-        token_type (CharField): Type of token (default: Bearer).
-        expires_at (DateTimeField): When the access token expires.
-    """
 
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="spotify_profile",
-    )
-    access_token = models.CharField(max_length=255)
-    refresh_token = models.CharField(max_length=255)
-    token_type = models.CharField(max_length=50, default="Bearer")
-    expires_at = models.DateTimeField()
-
-    def __str__(self):
-        return f"Spotify profile for {self.user.username}"
+class Playlist(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    name = models.CharField(max_length=120)
+    description = models.TextField(blank=True)
+    mood_prompt = models.CharField(max_length=240)
+    spotify_id = models.CharField(max_length=120, blank=True)  # filled later
+    created_at = models.DateTimeField(auto_now_add=True)

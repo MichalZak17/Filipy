@@ -6,9 +6,6 @@ from django.shortcuts import redirect
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 
-from backend.utils import get_spotify_access_token
-
-
 @login_required
 def index_view(request):
     """
@@ -80,3 +77,18 @@ def logout_view(request):
     """
     logout(request)
     return redirect("login")
+
+
+def spotify_playlists(request):
+    return render(request, "spotify_playlists.html")
+
+
+def settings_view(request):
+    """
+    Render the settings page.
+    """
+    if request.method == "POST":
+        # Handle settings update logic here
+        pass
+
+    return render(request, "settings.html")
