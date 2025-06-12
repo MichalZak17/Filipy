@@ -33,7 +33,7 @@ def login_view(request):
     If the user is already authenticated, they are redirected to the home page.
     For POST requests, it attempts to authenticate the user with the provided email and password.
     If authentication is successful, the user is logged in and redirected to the home page.
-    If authentication fails, an error message is returned as a JSON response.
+    If authentication fails, it re-renders the login page with an error message.
     For GET requests, it renders the login page.
 
     Args:
@@ -41,18 +41,17 @@ def login_view(request):
 
     Returns:
         HttpResponse: Redirects to the home page if the user is authenticated or after a successful login.
-        JsonResponse: Returns an error message if authentication fails.
-        HttpResponse: Renders the login page for GET requests.
+        HttpResponse: Renders the login page, potentially with an error message.
     """
     if request.user.is_authenticated:
         return redirect("home")
 
     if request.method == "POST":
-        email = request.POST.get("email")
-        password = request.POST.get("password")
+        email = request.POST.get("email", "").strip().lower()
+        password = request.POST.get("password", "").strip()
 
         if not email or not password:
-            return JsonResponse({"error": "Invalid email or password."})
+            return render(request, "login.html", {"error": "Please enter both email and password."})
 
         user = authenticate(request, username=email, password=password)
 
@@ -60,7 +59,7 @@ def login_view(request):
             login(request, user)
             return redirect("home")
         else:
-            return JsonResponse({"error": "Invalid email or password."})
+            return render(request, "login.html", {"error": "Invalid email or password."})
 
     else:
         return render(request, "login.html")
