@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:15
-    container_name: dreamchat_db
+    container_name: filipy_db
     restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -19,7 +19,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4
-    container_name: dreamchat_pgadmin
+    container_name: filipy_pgadmin
     restart: always
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
@@ -37,7 +37,7 @@ services:
       - "6379:6379"
   web:
     build: .
-    container_name: dreamchat_web
+    container_name: filipy_web
     depends_on:
       db:
         condition: service_healthy
