@@ -385,7 +385,7 @@ We welcome contributions to Filipy! If you'd like to help, please follow these g
     ```bash
     git clone https://github.com/MichalZak17/Filipy.git
     cd Filipy
-    ```
+    ``` 
 3.  **Create a New Branch**:
     ```bash
     git checkout -b feature/your-descriptive-feature-name
