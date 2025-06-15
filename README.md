@@ -8,7 +8,7 @@ Filipy is a web application that creates personalized Spotify playlists based on
 [![Django REST Framework](https://img.shields.io/badge/DRF-3.16-orange.svg?style=flat-square)](#tech-stack)
 [![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-lightgrey.svg?style=flat-square)](#tech-stack)
 [![Docker](https://img.shields.io/badge/Docker-Supported-blueviolet.svg?style=flat-square)](#installation)
-![Last Commit](https://img.shields.io/github/last-commit/MichalZak17/filipy?style=flat-square) -->
+![Last Commit](https://img.shields.io/github/last-commit/MichalZak17/filipy?style=flat-square)
 
 ## Overview
 
