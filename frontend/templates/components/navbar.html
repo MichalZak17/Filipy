@@ -1,20 +1,58 @@
 {% load static %}
-<nav class="navbar navbar-expand-md fixed-top py-3 navbar-shrink" id="mainNav">
-    <div class="container"><a class="navbar-brand d-flex align-items-center" href="/"><span>Filipy</span></a><button data-bs-toggle="collapse" class="navbar-toggler" data-bs-target="#navcol-1"><span class="visually-hidden">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
-        <div class="collapse navbar-collapse" id="navcol-1">
-            <ul class="navbar-nav mx-auto">
-                <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
+<nav class="fixed top-0 left-0 right-0 z-50 transition-colors duration-300" id="mainNav">
+    <div class="container mx-auto px-4">
+        <div class="flex justify-between items-center py-4">
+            <a class="text-2xl font-bold text-white" href="/">Filipy</a>
+            <div class="hidden md:flex items-center space-x-6">
+                <a class="text-gray-300 hover:text-white transition" href="{% url 'home' %}">Home</a>
                 {% if user.is_authenticated %}
-                <li class="nav-item"><a class="nav-link" href="{% url 'spotify_playlists' %}">Playlists</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'settings' %}">Settings</a></li>
+                <a class="text-gray-300 hover:text-white transition" href="{% url 'spotify_playlists' %}">Playlists</a>
+                <a class="text-gray-300 hover:text-white transition" href="#">Settings</a>
                 {% endif %}
-            </ul>
-            
-            {% if not user.is_authenticated %}
-                <a class="btn btn-primary shadow" role="button" href="{% url 'login' %}">Log In</a>
-            {% else %}
-                <a class="btn btn-secondary shadow" role="button" href="{% url 'logout' %}">Log Out</a>
-            {% endif %}
+            </div>
+            <div class="hidden md:flex items-center space-x-4">
+                {% if not user.is_authenticated %}
+                <a class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition duration-300" href="{% url 'login' %}">Log In</a>
+                {% else %}
+                <a class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full transition duration-300" href="{% url 'logout' %}">Log Out</a>
+                {% endif %}
+            </div>
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="text-white focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
         </div>
     </div>
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-gray-800">
+        <a class="block py-2 px-4 text-sm text-gray-300 hover:bg-gray-700" href="{% url 'home' %}">Home</a>
+        {% if user.is_authenticated %}
+        <a class="block py-2 px-4 text-sm text-gray-300 hover:bg-gray-700" href="{% url 'spotify_playlists' %}">Playlists</a>
+        <a class="block py-2 px-4 text-sm text-gray-300 hover:bg-gray-700" href="#">Settings</a>
+        <a class="block py-2 px-4 text-sm text-gray-300 hover:bg-gray-700" href="{% url 'logout' %}">Log Out</a>
+        {% else %}
+        <a class="block py-2 px-4 text-sm text-gray-300 hover:bg-gray-700" href="{% url 'login' %}">Log In</a>
+        {% endif %}
+    </div>
 </nav>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const mainNav = document.getElementById('mainNav');
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        window.addEventListener('scroll', function () {
+            if (window.scrollY > 50) {
+                mainNav.classList.add('bg-gray-900', 'shadow-lg');
+            } else {
+                mainNav.classList.remove('bg-gray-900', 'shadow-lg');
+            }
+        });
+
+        mobileMenuButton.addEventListener('click', function () {
+            mobileMenu.classList.toggle('hidden');
+        });
+    });
+</script>

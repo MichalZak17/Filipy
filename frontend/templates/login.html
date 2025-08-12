@@ -2,30 +2,46 @@
 {% load static %}
 
 {% block title %}Login{% endblock %}
+
 {% block content %}
-<section class="my-5 py-4 py-md-5">
-    <div class="container py-md-5">
-        <div class="row">
-            <div class="col-md-6 text-center"><img class="img-fluid w-100" src="{% static 'assets/img/illustrations/login.svg' %}"></div>
-            <div class="col-md-5 col-xl-4 text-center text-md-start">
-                <h2 class="display-6 fw-bold mb-5"><span class="pb-1 underline"><strong>Login</strong><br></span></h2>
-                <form method="post" data-bs-theme="light" action="{% url 'login' %}">
-                    {% csrf_token %}
+<body class="bg-gray-900 text-white font-sans">
 
-                    {% if error %}
-                        <div class="alert alert-danger" role="alert">
-                            {{ error }}
+    <section class="min-h-screen flex items-center justify-center">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="text-center">
+                    <img class="w-full max-w-md mx-auto" src="{% static 'assets/img/illustrations/login.svg' %}" alt="Login illustration">
+                </div>
+                <div class="bg-white/10 backdrop-blur-lg rounded-lg p-8 shadow-lg">
+                    <h2 class="text-4xl font-bold mb-6 text-center">Login</h2>
+                    <form method="post" action="{% url 'login' %}">
+                        {% csrf_token %}
+
+                        {% if error %}
+                            <div class="bg-red-500 text-white p-3 rounded mb-4" role="alert">
+                                {{ error }}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-4">
+                            <input class="w-full px-4 py-3 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:border-green-500" type="email" name="email" placeholder="Email" required>
                         </div>
-                    {% endif %}
-
-                    <div class="mb-3"><input class="shadow form-control" type="email" name="email" placeholder="Email"></div>
-                    <div class="mb-3"><input class="shadow form-control" type="password" name="password" placeholder="Password"></div>
-                    <div class="mb-5"><button class="btn btn-primary shadow" type="submit">Log in</button></div>
-                </form>
-                <p class="text-muted"><a href="{% url 'signup' %}">Want to create an account?</a></p>
-                <p class="text-muted"><a href="/forgotten-password">Forgot your password?</a></p>
+                        <div class="mb-4">
+                            <input class="w-full px-4 py-3 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:border-green-500" type="password" name="password" placeholder="Password" required>
+                        </div>
+                        <div class="mb-6">
+                            <button class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg transition duration-300" type="submit">Log In</button>
+                        </div>
+                    </form>
+                    <div class="text-center text-gray-400">
+                        <a href="{% url 'signup' %}" class="hover:text-green-400">Want to create an account?</a>
+                        <span class="mx-2">|</span>
+                        <a href="/forgotten-password" class="hover:text-green-400">Forgot your password?</a>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
+
+</body>
 {% endblock %}

@@ -1,32 +1,44 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Spotify Playlists{% endblock %}
+{% block title %}Sign Up{% endblock %}
+
 {% block content %}
-<section class="my-5 py-4 py-md-5">
-    <div class="container py-md-5">
-        <div class="row">
-            <div class="col-md-6 text-center"><img class="img-fluid w-100" src="{% static 'assets/img/illustrations/register.svg' %}"></div>
-            <div class="col-md-5 col-xl-4 text-center text-md-start">
-                <h2 class="display-6 fw-bold mb-5"><span class="pb-1 underline"><strong>Sign up</strong></span></h2>
-                <form method="post" data-bs-theme="light" action="{% url 'signup' %}">
-                    {% csrf_token %}
-                    <div id="form-error-messages" style="color: red; margin-bottom: 1rem;"></div>
-                    <div class="mb-3"><input class="shadow-sm form-control" type="email" name="email" placeholder="Email" required></div>
-                    <div class="mb-3"><input class="shadow-sm form-control" type="password" name="password" placeholder="Password" required></div>
-                    <div class="mb-3"><input class="shadow-sm form-control" type="password" name="password_repeat" placeholder="Repeat Password" required></div>
-                    <div class="mb-5"><button class="btn btn-primary shadow" type="submit">Create account</button></div>
-                </form>
-                <p class="text-muted">Have an account? <a href="login.html">Log in&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-arrow-narrow-right">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                            <path d="M5 12l14 0"></path>
-                            <path d="M15 16l4 -4"></path>
-                            <path d="M15 8l4 4"></path>
-                        </svg></a>&nbsp;</p>
+<body class="bg-gray-900 text-white font-sans">
+
+    <section class="min-h-screen flex items-center justify-center">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="text-center">
+                    <img class="w-full max-w-md mx-auto" src="{% static 'assets/img/illustrations/register.svg' %}" alt="Sign up illustration">
+                </div>
+                <div class="bg-white/10 backdrop-blur-lg rounded-lg p-8 shadow-lg">
+                    <h2 class="text-4xl font-bold mb-6 text-center">Create Account</h2>
+                    <form method="post" action="{% url 'signup' %}">
+                        {% csrf_token %}
+                        <div id="form-error-messages" class="text-red-400 mb-4"></div>
+                        <div class="mb-4">
+                            <input class="w-full px-4 py-3 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:border-green-500" type="email" name="email" placeholder="Email" required>
+                        </div>
+                        <div class="mb-4">
+                            <input class="w-full px-4 py-3 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:border-green-500" type="password" name="password" placeholder="Password" required>
+                        </div>
+                        <div class="mb-4">
+                            <input class="w-full px-4 py-3 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:border-green-500" type="password" name="password_repeat" placeholder="Repeat Password" required>
+                        </div>
+                        <div class="mb-6">
+                            <button class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg transition duration-300" type="submit">Create Account</button>
+                        </div>
+                    </form>
+                    <div class="text-center text-gray-400">
+                        <p>Have an account? <a href="{% url 'login' %}" class="hover:text-green-400">Log in</a></p>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
+
+</body>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -93,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (messages.length === 0 && data.error) {
                              messages.push(data.error);
                         }
-                         if (messages.length === 0 && data.detail) { 
+                         if (messages.length === 0 && data.detail) {
                              messages.push(data.detail);
                         }
                     }
